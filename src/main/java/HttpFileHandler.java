@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -159,46 +162,46 @@ public class HttpFileHandler implements HttpRequestHandler {
 	 * @return
 	 */
 	private String programRunningOnComputer() {
-		// try {
-		// executeProgram = URLDecoder.decode(executeProgram, "UTF8");
-		// } catch (UnsupportedEncodingException e1) {
-		// e1.printStackTrace();
-		// }
-		// Runtime rt = Runtime.getRuntime();
-		// Process p = null;
-		// try {
-		// if ("\\".equals(File.separator)) { // this guy is windosa
-		// System.out.println("Im Windows !!");
-		// p = rt.exec(executeProgram);
-		// p.waitFor();
-		// } else {
-		// p = rt.exec(new String[] { "bash", "-c", executeProgram });
-		// }
-		// } catch (IOException e) {
-		// System.out
-		// .println("Something bad happened while processing command '"
-		// + executeProgram + "'");
-		// } catch (InterruptedException e) {
-		// e.printStackTrace();
-		// }
-		// String result = "Empty result";
-		// if (p != null) {
-		// InputStream stream = p.getInputStream();
-		// StringWriter writer = new StringWriter();
-		// try {
-		// IOUtils.copy(stream, writer, "UTF8");
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// } finally {
-		// IOUtils.closeQuietly(stream);
-		// }
-		// result = writer.toString();
-		// }
-		return "Hello world";
+		try {
+			executeProgram = URLDecoder.decode(executeProgram, "UTF8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		Runtime rt = Runtime.getRuntime();
+		Process p = null;
+		try {
+			if ("\\".equals(File.separator)) { // this guy is windosa
+				System.out.println("Im Windows !!");
+				p = rt.exec(executeProgram);
+				p.waitFor();
+			} else {
+				p = rt.exec(new String[] { "bash", "-c", executeProgram });
+			}
+		} catch (IOException e) {
+			System.out
+					.println("Something bad happened while processing command '"
+							+ executeProgram + "'");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		String result = "Empty result";
+		if (p != null) {
+			InputStream stream = p.getInputStream();
+			StringWriter writer = new StringWriter();
+			try {
+				IOUtils.copy(stream, writer, "UTF8");
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				IOUtils.closeQuietly(stream);
+			}
+			result = writer.toString();
+		}
+		return result;
 	}
 
 	private String getResponseUrl() {
-		return "http:/" + returnIp + ":" + returnPort;
+		return "http://" + returnIp + ":" + returnPort;
 	}
 
 	private void setHomeView(final HttpResponse response) throws IOException {
