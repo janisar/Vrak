@@ -56,6 +56,7 @@ public class JsonUtils {
 
 	private static String escapeSlash(String resultBlob) {
 		String a = resultBlob.replaceAll("\\n", "\\\\n");
+		a = a.replaceAll("\\r", "\\\\r");
 		return a;
 	}
 
