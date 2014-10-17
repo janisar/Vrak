@@ -1,0 +1,168 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset = "UTF8">
+		<title>Võrgurakendus II  --  P2NET</title>
+	</head>
+	<style>
+		.op-image {
+			height: 60px;
+		}
+		.op-image img {
+			max-height: 100%;
+		}
+		#result {
+			background-color: #F5E5CF;
+			width: 60%;
+			margin-left: 20%;
+			min-height: 200px;
+			height: 300px;
+			overflow-y: scroll;
+		}
+		.friends {
+			float:left;
+			background-color: #fff;
+			width: 40%;
+			margin-left: 30%;
+			height: 80px;
+			overflow-y: scroll;
+		}
+		.ip {
+			width: 50%;
+			float: left;
+		}
+		.port {
+			width: 50%;
+			float: right;
+		}
+		.content {
+			text-align: center;
+			width: 90%;
+			margin-left: 5%;
+			background-color: #f3f3f3;
+		}
+		#button {
+			margin-top: 15px;
+			min-width: 100px;
+			width: 20%;
+			height: 40px;
+			background-color: #AAF68E;
+			font-weight: 700;
+			font-size: 1.1em;
+			border-radius: 8px;
+			border-color: #FFFFFF;
+		}
+		#button:hover {
+			cursor: pointer;
+		}
+	</style>
+	<body>
+		<script src = "http://code.jquery.com/jquery-2.1.0.min.js"></script>
+		<div class = "content">
+			<h1>Tere tulemast P2Net'i!</h1>
+			<div class = "friends">
+				<div class = "ip">
+					<b><i>IP aadress</i></b><br>
+				</div>
+				<div class = "port">
+					<b><i>Port</i></b><br>
+				</div>
+			</div><p>
+			<div id = "result"></div>
+			<p>
+			<input name = "progr" id = "progr" type = "text" placeholder = "Sisesta käsurea programm"/>
+			<br/><button id = "button" onclick ="sendForm()" >Küsi midagi</button>
+			<button id = "button" onclick ="clearData()" >Tühjenda data</button>
+		</div>
+		
+		<script>
+			var win_logo = "http://akroot313.andrewkeir313.netdna-cdn.com/wp-content/uploads/windows-8-logo-excerpt.jpg";
+			var mac_logo = "http://www.decalsplanet.com/img_b/vinyl-decal-sticker-144.jpg";
+			var linux_logo = "http://www1.pcmag.com/media/images/297876-linux-logo.jpg?thumb=y";
+			
+			sessionStorage.SessionName = "SessionData";
+			var length = sessionStorage.getItem("length");
+			if (length == 0) {
+				sessionStorage.setItem("length",50000);
+				length = sessionStorage.getItem("length");
+			} else if (length < 800) {
+				var l = +length + +100;
+				sessionStorage.setItem("length",l);
+				length = sessionStorage.getItem("length");
+			} else if (length > 50000) {
+				sessionStorage.setItem("length",50000);
+				length = sessionStorage.getItem("length");
+			} else {
+				sessionStorage.setItem("length",50000);
+				length = sessionStorage.getItem("length");
+			}
+			
+			setTimeout(function(){
+			   window.location.reload(1);
+			}, length);
+			var result = '${result}';
+			var machines = '${machines}';
+			function sendForm() {
+				$.ajax({
+					url: "/",
+					method : "GET",
+					data: {
+						proge: $('#progr').val(),
+						ttl: 1
+					}
+				});
+				sessionStorage.setItem("length",600);
+				window.location.reload(1);
+			}
+			
+			function clearData() {
+				$.ajax({
+					url: "/",
+					method : "GET",
+					data: {
+						clear: 0
+					}
+				}).done(function() {
+					window.location.reload(1);
+				});
+			}
+			function addMachine() {
+				$.ajax({
+					url: "/",
+					method : "GET",
+					data: {
+						machine: $('#newMachine').val()
+					}
+				}).done(function() {
+					window.location.reload(1);
+				});
+			}
+			
+			
+			$(document).ready(function() {
+				var jsonObject = jQuery.parseJSON(machines);
+				var friends = jsonObject.friends;
+				var jsonResult= jQuery.parseJSON(result);
+				var fullResult = jsonResult.data;
+
+				for (var i = 0; i < friends.length; i++) {
+					$('.friends').append('<div class = "ip"><i>' + friends[i].ip + '</i></div>');
+					$('.friends').append('<div class = "port"><i>' + friends[i].port + '</i></div>');
+				}
+				//$('.friends').append('<input type = "text" id = "newMachine"/><button onclick="addMachine()" id = "button">Uus</button>');
+				for (var i = 0; i < fullResult.length; i++) {
+					$('#result').append('<div class = "header"><i>' + fullResult[i].ip + '  '  + fullResult[i].port + '</i></div>');
+					$('#result').append('<div class = "date"><i>' + fullResult[i].date + '</i></div>');
+					$('#result').append('<div class = "data"><i>' + fullResult[i].data + '</i></div>');
+					if (fullResult[i].op == "Linux") {
+						$('#result').append('<div class = "op-image"><img src = "' + linux_logo + '"/></div><p>');
+					} else if (fullResult[i].op == "Windows") {
+						$('#result').append('<div class = "op-image"><img src = "' + win_logo + '"/></div><p>');
+					} else if (fullResult[i].op == "Mac") {
+						$('#result').append('<div class = "op-image"><img src = "' + mac_logo + '"/></div><p>');
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
