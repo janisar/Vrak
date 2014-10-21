@@ -1,4 +1,4 @@
-package main.java;
+package main.java.ee.vrak;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import main.java.ee.vrak.http.HttpFileHandler;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;

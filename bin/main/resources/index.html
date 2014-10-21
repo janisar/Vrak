@@ -5,6 +5,40 @@
 		<title>Võrgurakendus II  --  P2NET</title>
 	</head>
 	<style>
+		.modalDialog {
+			position: fixed;
+			font-family: Arial, Helvetica, sans-serif;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			background: rgba(0,0,0,0.8);
+			z-index: 99999;
+			opacity:0;
+			-webkit-transition: opacity 400ms ease-in;
+			-moz-transition: opacity 400ms ease-in;
+			transition: opacity 400ms ease-in;
+			pointer-events: none;
+		}
+		.modalDialog:target {
+			opacity:1;
+			pointer-events: auto;
+		}
+
+		.modalDialog > div {
+			width: 400px;
+			position: relative;
+			margin: 10% auto;
+			padding: 5px 20px 13px 20px;
+			border-radius: 10px;
+			background: #fff;
+			background: -moz-linear-gradient(#fff, #999);
+			background: -webkit-linear-gradient(#fff, #999);
+			background: -o-linear-gradient(#fff, #999);
+		}
+		h5:HOVER {
+			cursor: pointer;
+		}
 		.op-image {
 			height: 60px;
 		}
@@ -74,7 +108,14 @@
 			<br/><button id = "button" onclick ="sendForm()" >Küsi midagi</button>
 			<button id = "button" onclick ="clearData()" >Tühjenda data</button>
 		</div>
-		
+
+		<div id="openData" class="modalDialog">
+			<div>
+				<a href="#close" title="Close" class="close">X</a>
+				<h2>Result</h2>
+				<div id = "current-data"></div>
+			</div>
+		</div>
 		<script>
 			var win_logo = "http://akroot313.andrewkeir313.netdna-cdn.com/wp-content/uploads/windows-8-logo-excerpt.jpg";
 			var mac_logo = "http://www.decalsplanet.com/img_b/vinyl-decal-sticker-144.jpg";
@@ -108,7 +149,7 @@
 					method : "GET",
 					data: {
 						proge: $('#progr').val(),
-						ttl: 1
+						ttl: 5
 					}
 				});
 				sessionStorage.setItem("length",600);
@@ -138,22 +179,19 @@
 				});
 			}
 			
-			
 			$(document).ready(function() {
 				var jsonObject = jQuery.parseJSON(machines);
-				var friends = jsonObject.friends;
 				var jsonResult= jQuery.parseJSON(result);
 				var fullResult = jsonResult.data;
-
-				for (var i = 0; i < friends.length; i++) {
-					$('.friends').append('<div class = "ip"><i>' + friends[i].ip + '</i></div>');
-					$('.friends').append('<div class = "port"><i>' + friends[i].port + '</i></div>');
+				for (var i = 0; i < jsonObject.length; i++) {
+					$('.friends').append('<div class = "ip"><i>' + jsonObject[i][0] + '</i></div>');
+					$('.friends').append('<div class = "port"><i>' + jsonObject[i][1] + '</i></div>');
 				}
 				//$('.friends').append('<input type = "text" id = "newMachine"/><button onclick="addMachine()" id = "button">Uus</button>');
 				for (var i = 0; i < fullResult.length; i++) {
 					$('#result').append('<div class = "header"><i>' + fullResult[i].ip + '  '  + fullResult[i].port + '</i></div>');
 					$('#result').append('<div class = "date"><i>' + fullResult[i].date + '</i></div>');
-					$('#result').append('<div class = "data"><i>' + fullResult[i].data + '</i></div>');
+					$('#result').append('<div class = "data"><h5 id = "' + fullResult[i].data + '"\>Show data</h5></div>');
 					if (fullResult[i].op == "Linux") {
 						$('#result').append('<div class = "op-image"><img src = "' + linux_logo + '"/></div><p>');
 					} else if (fullResult[i].op == "Windows") {
@@ -162,6 +200,18 @@
 						$('#result').append('<div class = "op-image"><img src = "' + mac_logo + '"/></div><p>');
 					}
 				}
+				$('h5').click(function() {
+					var destination = $(this).attr('id');
+					$.ajax({
+						url: "/",
+						data: {
+							getData: destination
+						}
+					}).success(function(data) {
+						$('#current-data').html(data);
+						location.href = "#openData";
+					});
+				});
 			});
 		</script>
 	</body>

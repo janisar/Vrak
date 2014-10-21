@@ -1,7 +1,9 @@
-package main.java;
+package main.java.ee.vrak.util;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -12,8 +14,10 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 
 public class ParameterUtil {
-	public static List<NameValuePair> getRequestParameters(HttpRequest request,
-			String method) throws MethodNotSupportedException, IOException {
+	public static List<NameValuePair> getRequestParameters(HttpRequest request)
+			throws MethodNotSupportedException, IOException {
+		String method = request.getRequestLine().getMethod()
+				.toUpperCase(Locale.ENGLISH);
 
 		List<NameValuePair> result = new ArrayList<NameValuePair>();
 		if (!method.equals("GET") && !method.equals("POST")) {
