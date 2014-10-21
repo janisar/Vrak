@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="/home/janis/Documents/java libraries/apache_http_libraries/fluent-hc-4.3.5.jar"/>
 	<classpathentry kind="lib" path="/home/janis/Documents/java libraries/apache_http_libraries/httpclient-4.3.5.jar"/>
 	<classpathentry kind="lib" path="/home/janis/Documents/java libraries/apache_http_libraries/httpclient-cache-4.3.5.jar"/>
-	<classpathentry kind="lib" path="/home/janis/Documents/java libraries/apache_http_libraries/httpcore-4.3.2.jar"/>
+	<classpathentry kind="lib" path="/home/janis/Documents/java libraries/apache_http_libraries/httpcore-4.3.2.jar" sourcepath="/home/janis/.m2/repository/org/apache/httpcomponents/httpcore/4.3.2/httpcore-4.3.2-sources.jar"/>
 	<classpathentry kind="lib" path="/home/janis/Documents/java libraries/apache_http_libraries/httpmime-4.3.5.jar"/>
 	<classpathentry kind="lib" path="/home/janis/Documents/java libraries/commons-io-2.4/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="/home/janis/Downloads/json-simple-1.1.1.jar"/>

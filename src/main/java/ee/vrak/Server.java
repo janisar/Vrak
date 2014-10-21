@@ -45,6 +45,7 @@ public class Server {
 		initFiles(tempStoreFile, tempMachinesFile);
 		HttpFileHandler httpFileHandler = new HttpFileHandler(tempMachinesFile,
 				tempStoreFile, docRoot, PORT);
+		httpFileHandler.clearData();
 		registry.register("*", httpFileHandler);
 
 		HttpService service = new HttpService(httpProc, registry);

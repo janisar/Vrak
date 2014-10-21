@@ -46,8 +46,6 @@ public class ResponseGenerator {
 				Map<String, ArrayList<String>> map = JsonUtils
 						.getFriends(jsonFileString);
 				new RequestGenerator(command, ttl).sendGetRequest(map);
-			} else {
-				System.out.println("TTL <= 0");
 			}
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
@@ -72,7 +70,6 @@ public class ResponseGenerator {
 	}
 
 	private String getResponseUrl() {
-		System.out.println(Constants.returnPort);
 		return "http://" + Constants.returnIp + ":" + Constants.returnPort;
 	}
 }

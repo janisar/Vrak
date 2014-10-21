@@ -86,14 +86,28 @@ public class HttpFileHandler implements HttpRequestHandler {
 		if (run) {
 			Map<String, ArrayList<String>> map = JsonUtils
 					.getFriends(jsonFileString);
+			getMachinesFromDijkstra(map);
 			new RequestGenerator(command, ttl).sendGetRequest(map);
 			setHomeView(response);
 		} else if (canSend(send)) {
 			new ResponseGenerator(machinesFilePath, command, ttl)
-			.setResponseJson(params);
+					.setResponseJson(params);
 		} else if (!showModal) {
 			setHomeView(response);
 		}
+	}
+
+	public void clearData() throws IOException {
+		FileUtils.write(tempStoreFile, "{\"data\":[]}");
+		try {
+			FileUtils.cleanDirectory(new File("main/resources/data"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void getMachinesFromDijkstra(Map<String, ArrayList<String>> map) {
+		new RequestGenerator().getDijkstraMachines(map, Constants.DIJKSTRA_URL);
 	}
 
 	private boolean canSend(boolean send) {
@@ -102,13 +116,10 @@ public class HttpFileHandler implements HttpRequestHandler {
 		return send && notMe;
 	}
 
-	private void clearData() throws IOException {
-		FileUtils.write(tempStoreFile, "{\"data\":[]}");
-	}
-
 	private void updateResultView(String value) throws IOException {
 		String data = JsonUtils.getData(value);
-		File dataFile = new File("Data" + UUID.randomUUID().toString());
+		File dataFile = new File("main/resources/data/Data"
+				+ UUID.randomUUID().toString());
 		FileUtils.write(dataFile, data);
 		String dataWithFile = JsonUtils.replaceData(value,
 				dataFile.getAbsolutePath());
@@ -158,7 +169,6 @@ public class HttpFileHandler implements HttpRequestHandler {
 
 		try {
 			String result = FileUtils.readFileToString(file);
-			System.out.println(result);
 			response.setEntity(new StringEntity(result, ContentType.create(
 					"text/html", Charset.forName("UTF8"))));
 			response.setHeader("Content-Length", "" + result.length());
