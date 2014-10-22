@@ -16,7 +16,7 @@ import org.json.simple.parser.ParseException;
 
 public class JsonUtils {
 
-	public static Map<String, ArrayList<String>> getFriends(String jsonString) {
+	public static Map<String, ArrayList<String>> getMachines(String jsonString) {
 		Map<String, ArrayList<String>> machinesMap = new HashMap<String, ArrayList<String>>();
 		JSONArray object = new JSONArray();
 		JSONParser parser = new JSONParser();

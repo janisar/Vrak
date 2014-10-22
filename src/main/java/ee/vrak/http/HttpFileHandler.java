@@ -85,7 +85,7 @@ public class HttpFileHandler implements HttpRequestHandler {
 		}
 		if (run) {
 			Map<String, ArrayList<String>> map = JsonUtils
-					.getFriends(jsonFileString);
+					.getMachines(jsonFileString);
 			getMachinesFromDijkstra(map);
 			new RequestGenerator(command, ttl).sendGetRequest(map);
 			setHomeView(response);

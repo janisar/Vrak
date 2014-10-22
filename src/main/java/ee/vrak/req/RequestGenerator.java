@@ -106,7 +106,7 @@ public class RequestGenerator {
 	private void addMachinesToMap(Map<String, ArrayList<String>> map,
 			String machines) {
 		Map<String, ArrayList<String>> currentMachines = JsonUtils
-				.getFriends(machines);
+				.getMachines(machines);
 		for (Entry<String, ArrayList<String>> entry : currentMachines
 				.entrySet()) {
 			String ip = entry.getKey();

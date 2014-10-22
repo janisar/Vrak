@@ -44,7 +44,7 @@ public class ResponseGenerator {
 						ClasspathUtil.getFileFromClasspath(machinesFilePath),
 						"UTF8");
 				Map<String, ArrayList<String>> map = JsonUtils
-						.getFriends(jsonFileString);
+						.getMachines(jsonFileString);
 				new RequestGenerator(command, ttl).sendGetRequest(map);
 			}
 		} catch (ClientProtocolException e) {
