@@ -12,8 +12,45 @@ import org.apache.http.MethodNotSupportedException;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 public class ParameterUtil {
+	/**
+	 * Võtab urli ette ja tükeldab parameetrid endale mõistetavaks.
+	 * NameValuePair on tore asi.
+	 *
+	 * @param uri
+	 * @return
+	 */
+	private static List<NameValuePair> getGetParameters(String uri) {
+		if (uri.length() > 2) {
+			uri = uri.substring(2);
+		}
+		if (uri.indexOf("?") > -1) {
+			uri = uri.substring(uri.indexOf("?") + 1);
+		}
+		List<NameValuePair> result = new ArrayList<NameValuePair>();
+		String[] splitParams = uri.split("&");
+		for (String s : splitParams) {
+			String[] keyValuePair = s.split("=");
+			if (keyValuePair.length > 1) {
+				for (int i = 0; i < keyValuePair.length; i += 2) {
+					result.add(new BasicNameValuePair(keyValuePair[0],
+							keyValuePair[1]));
+				}
+			}
+		}
+		return result;
+	}
+
+	public static String getPath(String uri) {
+		int endPos = uri.indexOf("?");
+		if (endPos < 0) {
+			return uri.substring(1);
+		}
+		return uri.substring(1, endPos);
+	}
+
 	public static List<NameValuePair> getRequestParameters(HttpRequest request)
 			throws MethodNotSupportedException, IOException {
 		String method = request.getRequestLine().getMethod()
@@ -35,27 +72,13 @@ public class ParameterUtil {
 		return result;
 	}
 
-	/**
-	 * Võtab urli ette ja tükeldab parameetrid endale mõistetavaks.
-	 * NameValuePair on tore asi.
-	 *
-	 * @param uri
-	 * @return
-	 */
-	private static List<NameValuePair> getGetParameters(String uri) {
-		if (uri.length() > 2) {
-			uri = uri.substring(2);
-		}
-		List<NameValuePair> result = new ArrayList<NameValuePair>();
-		String[] splitParams = uri.split("&");
-		for (String s : splitParams) {
-			String[] keyValuePair = s.split("=");
-			if (keyValuePair.length > 1) {
-				for (int i = 0; i < keyValuePair.length; i += 2) {
-					result.add(new BasicNameValuePair(keyValuePair[0],
-							keyValuePair[1]));
-				}
-			}
+	public static String getResult(HttpRequest request) {
+		String result = "";
+		try {
+			HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
+			result = EntityUtils.toString(entity);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return result;
 	}

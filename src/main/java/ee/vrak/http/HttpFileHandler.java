@@ -47,53 +47,15 @@ public class HttpFileHandler implements HttpRequestHandler {
 		this.tempMachinesFile = tempMachinesFile;
 		Constants.port = port;
 		this.docRoot = docRoot;
-		this.machinesFilePath = docRoot.replace("index.html", "machines.txt");
+		machinesFilePath = docRoot.replace("index.html", "machines.txt");
 	}
 
-	@Override
-	public void handle(final HttpRequest request, final HttpResponse response,
-			final HttpContext context) throws HttpException, IOException {
-		InputStream machinesStream = ClasspathUtil
-				.getFileFromClasspath(machinesFilePath);
-		String jsonFileString = IOUtils.toString(machinesStream, "UTF8");
-		boolean run = false, send = false, showModal = false;
-
-		List<NameValuePair> params = ParameterUtil
-				.getRequestParameters(request);
-
-		for (NameValuePair nvp : params) {
-			if (nvp.getName().toLowerCase().equals("proge")) {
-				run = true;
-				command = nvp.getValue();
-			} else if (nvp.getName().toLowerCase().equals("data")) {
-				updateResultView(nvp.getValue());
-			} else if (nvp.getName().toLowerCase().equals("send")) {
-				command = nvp.getValue();
-				send = true;
-			} else if (nvp.getName().toLowerCase().equals("returnip")) {
-				Constants.returnIp = nvp.getValue();
-			} else if (nvp.getName().toLowerCase().equals("returnport")) {
-				Constants.returnPort = Integer.valueOf(nvp.getValue());
-			} else if (nvp.getName().toLowerCase().equals("ttl")) {
-				this.ttl = Integer.valueOf(nvp.getValue()) - 1;
-			} else if (nvp.getName().toLowerCase().equals("clear")) {
-				clearData();
-			} else if (nvp.getName().toLowerCase().equals("getdata")) {
-				sendFileToClient(response, nvp.getValue());
-				showModal = true;
-			}
-		}
-		if (run) {
-			Map<String, ArrayList<String>> map = JsonUtils
-					.getFriends(jsonFileString);
-			getMachinesFromDijkstra(map);
-			new RequestGenerator(command, ttl).sendGetRequest(map);
-			setHomeView(response);
-		} else if (canSend(send)) {
-			new ResponseGenerator(machinesFilePath, command, ttl)
-					.setResponseJson(params);
-		} else if (!showModal) {
-			setHomeView(response);
+	private boolean canSend() {
+		if (Constants.sendIp != null) {
+			return Constants.ip != Constants.sendIp
+					&& Constants.port != Constants.sendPort;
+		} else {
+			return false;
 		}
 	}
 
@@ -110,32 +72,72 @@ public class HttpFileHandler implements HttpRequestHandler {
 		new RequestGenerator().getDijkstraMachines(map, Constants.DIJKSTRA_URL);
 	}
 
-	private boolean canSend(boolean send) {
-		boolean notMe = Constants.ip != Constants.returnIp
-				&& Constants.port != Constants.returnPort;
-		return send && notMe;
-	}
-
-	private void updateResultView(String value) throws IOException {
-		String data = JsonUtils.getData(value);
-		File dataFile = new File("main/resources/data/Data"
-				+ UUID.randomUUID().toString());
-		FileUtils.write(dataFile, data);
-		String dataWithFile = JsonUtils.replaceData(value,
-				dataFile.getAbsolutePath());
-		writeToFile(tempStoreFile, dataWithFile);
-	}
-
-	private void writeToFile(File file, String result) throws IOException {
-		RandomAccessFile randAccessFile = new RandomAccessFile(file, "rw");
-		long fileLen = randAccessFile.length();
-		randAccessFile.seek(fileLen - 2);
-		if (fileLen > 20) {
-			randAccessFile.write(",".getBytes());
+	@Override
+	public void handle(final HttpRequest request, final HttpResponse response,
+			final HttpContext context) throws HttpException, IOException {
+		InputStream machinesStream = ClasspathUtil.getFileFromClasspath(machinesFilePath);
+		String jsonFileString = IOUtils.toString(machinesStream, "UTF8");
+		String path = ParameterUtil.getPath(request.getRequestLine().getUri());
+		if (path.equals("result")) {
+			String data = ParameterUtil.getResult(request);
+			updateResultView(data);
 		}
-		randAccessFile.write(result.getBytes());
-		randAccessFile.write("]}".getBytes());
-		randAccessFile.close();
+
+		List<NameValuePair> params = ParameterUtil.getRequestParameters(request);
+		boolean showHome = initFields(response, params);
+
+		if (path.toLowerCase().equals("run") && canSend()) {
+			new ResponseGenerator(machinesFilePath, command, ttl)
+			.setResponseJson(params);
+		} else if (path.toLowerCase().equals("run")) {
+			if (ttl > 0) {
+				Map<String, ArrayList<String>> map = JsonUtils
+						.getFriends(jsonFileString);
+				getMachinesFromDijkstra(map);
+				new RequestGenerator(command, ttl).sendGetRequest(map);
+			}
+			setHomeView(response);
+		} else if (showHome) {
+			setHomeView(response);
+		}
+	}
+
+	private boolean initFields(HttpResponse response, List<NameValuePair> params) throws IOException {
+		for (NameValuePair nvp : params) {
+			if (nvp.getName().toLowerCase().equals("prog")) {
+				command = nvp.getValue();
+			} else if (nvp.getName().toLowerCase().equals("sendip")) {
+				Constants.sendIp = nvp.getValue();
+			} else if (nvp.getName().toLowerCase().equals("sendport")) {
+				Constants.sendPort = Integer.valueOf(nvp.getValue());
+			} else if (nvp.getName().toLowerCase().equals("ttl")) {
+				ttl = Integer.valueOf(nvp.getValue()) - 1;
+			} else if (nvp.getName().toLowerCase().equals("clear")) {
+				clearData();
+			} else if (nvp.getName().toLowerCase().equals("getdata")) {
+				sendFileToClient(response, nvp.getValue());
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private void sendFileToClient(HttpResponse response, String value) {
+
+		response.setHeader("Content-Type", "text/html");
+		value = URLDecoder.decode(value);
+		File file = new File(value);
+
+		try {
+			String result = FileUtils.readFileToString(file);
+			response.setEntity(new StringEntity(result, ContentType.create(
+					"text/html", Charset.forName("UTF8"))));
+			response.setHeader("Content-Length", "" + result.length());
+		} catch (UnsupportedEncodingException e) {
+		} catch (IOException e) {
+			System.out.println("Cannot open file '" + file.getAbsolutePath()
+					+ "'");
+		}
 	}
 
 	private void setHomeView(final HttpResponse response) throws IOException {
@@ -161,29 +163,33 @@ public class HttpFileHandler implements HttpRequestHandler {
 		}
 	}
 
-	private void sendFileToClient(HttpResponse response, String value) {
-
-		response.setHeader("Content-Type", "text/html");
-		value = URLDecoder.decode(value);
-		File file = new File(value);
-
-		try {
-			String result = FileUtils.readFileToString(file);
-			response.setEntity(new StringEntity(result, ContentType.create(
-					"text/html", Charset.forName("UTF8"))));
-			response.setHeader("Content-Length", "" + result.length());
-		} catch (UnsupportedEncodingException e) {
-		} catch (IOException e) {
-			System.out.println("Cannot open file '" + file.getAbsolutePath()
-					+ "'");
-		}
-	}
-
 	public void setIp(String ip) {
 		Constants.ip = ip;
 	}
 
 	public void setPort(int port) {
 		Constants.port = port;
+	}
+
+	private void updateResultView(String value) throws IOException {
+		String data = JsonUtils.getData(value);
+		File dataFile = new File("main/resources/data/Data"
+				+ UUID.randomUUID().toString());
+		FileUtils.write(dataFile, data);
+		String dataWithFile = JsonUtils.replaceData(value,
+				dataFile.getAbsolutePath());
+		writeToFile(tempStoreFile, dataWithFile);
+	}
+
+	private void writeToFile(File file, String result) throws IOException {
+		RandomAccessFile randAccessFile = new RandomAccessFile(file, "rw");
+		long fileLen = randAccessFile.length();
+		randAccessFile.seek(fileLen - 2);
+		if (fileLen > 20) {
+			randAccessFile.write(",".getBytes());
+		}
+		randAccessFile.write(result.getBytes());
+		randAccessFile.write("]}".getBytes());
+		randAccessFile.close();
 	}
 }

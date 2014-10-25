@@ -145,10 +145,10 @@
 			var machines = '${machines}';
 			function sendForm() {
 				$.ajax({
-					url: "/",
+					url: "run",
 					method : "GET",
 					data: {
-						proge: $('#progr').val(),
+						prog: $('#progr').val(),
 						ttl: 5
 					}
 				});
